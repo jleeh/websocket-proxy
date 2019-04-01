@@ -6,7 +6,7 @@ own implementations with the http.Handler interface, or installed directly to be
 Supported authentication methods:
 
 - Headers (X-API-KEY)
-- Param (GET Param `apikey`)
+- GET Param (apikey)
 
 Supported key management tools:
 
@@ -16,10 +16,17 @@ Supported key management tools:
 ## Install & Build
 
 ```
-go get github.com/jleeh/websocket-proxy && go build -o $GOPATH/bin/websocket-proxy
+go get -d github.com/jleeh/websocket-proxy && go build -o $GOPATH/bin/websocket-proxy
 ```
 
 ## Running the Proxy
+
+### Docker
+```
+docker run -e SERVER=ws://localhost:3000 -it jonnyh/websocket-proxy:latest
+```
+
+### Local
 You can run the WebSocket proxy by just running the built binary:
 ```
 ./websocket-proxy

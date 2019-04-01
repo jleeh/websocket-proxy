@@ -36,7 +36,9 @@ func NewKeyManager(keyManagerType string, id string) KeyManager {
 	case KeyManagerSecretsManager:
 		k = &SecretsManager{}
 	}
-	k.setIdentifier(id)
+	if k != nil {
+		k.setIdentifier(id)
+	}
 	return k
 }
 
