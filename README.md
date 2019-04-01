@@ -104,6 +104,8 @@ func (p *Header) Authenticate(r *http.Request, km KeyManager) bool {
 }
 ```
 
+You can create your own implementation of an Auth type to then pass into the `proxy.NewProxy(...)` method.
+
 ### Extending KeyManager
 
 Interface:
