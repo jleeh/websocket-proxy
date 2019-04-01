@@ -30,6 +30,11 @@ type websocketProxy struct {
 	Upgrader    *websocket.Upgrader
 }
 
+// NewSimpleProxy returns a configured proxy instance from just a url
+func NewSimpleProxy(url *url.URL) (WebsocketProxy, error) {
+	return NewProxy(url, nil, nil, nil, nil)
+}
+
 // NewProxy returns a configured WebsocketProxy instance and fetches keys if required
 func NewProxy(
 	url *url.URL,
