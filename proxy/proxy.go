@@ -77,7 +77,6 @@ func (wp websocketProxy) Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	sc, err := wp.Dial()
 	if err != nil {
-		http.Error(w, err.Error(), 500)
 		return
 	}
 	conn := &connection{cc, sc}

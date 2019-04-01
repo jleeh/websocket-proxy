@@ -1,0 +1,6 @@
+port:
+server:
+auth_type:
+key_manager_type:
+key_identifier:
+allowed_origins:

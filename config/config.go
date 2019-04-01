@@ -10,6 +10,7 @@ type Config struct {
 	Server         string   `mapstructure:"server"`
 	AuthType       string   `mapstructure:"auth_type"`
 	KeyManagerType string   `mapstructure:"key_manager_type"`
+	KeyIdentifier  string   `mapstructure:"key_identifier"`
 	AllowedOrigins []string `mapstructure:"allowed_origins"`
 }
 

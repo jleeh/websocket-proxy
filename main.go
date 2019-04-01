@@ -24,7 +24,7 @@ func main() {
 		nil,
 		c.AllowedOrigins,
 		proxy.NewAuth(c.AuthType),
-		proxy.NewKeyManager(c.KeyManagerType),
+		proxy.NewKeyManager(c.KeyManagerType, c.KeyIdentifier),
 	)
 	if err != nil {
 		log.Fatalf("Error creating new proxy: %v", err)
@@ -59,6 +59,7 @@ func configDefaults() map[string]interface{} {
 		"server":           "ws://localhost:3000",
 		"auth_type":        "",
 		"key_manager_type": "",
+		"key_identifier":   "",
 		"allowed_origins":  []string{},
 	}
 }
