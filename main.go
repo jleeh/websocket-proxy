@@ -19,7 +19,13 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error parsing server: %v", err)
 	}
-	wp, err := proxy.NewProxy(u, nil, proxy.NewAuth(c.AuthType), proxy.NewKeyManager(c.KeyManagerType))
+	wp, err := proxy.NewProxy(
+		u,
+		nil,
+		c.AllowedOrigins,
+		proxy.NewAuth(c.AuthType),
+		proxy.NewKeyManager(c.KeyManagerType),
+	)
 	if err != nil {
 		log.Fatalf("Error creating new proxy: %v", err)
 	}
@@ -32,8 +38,11 @@ func main() {
 	}
 
 	go func() {
-		http.HandleFunc("/", wp.Handler)
-		log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", c.Port), nil))
+		mux := http.NewServeMux()
+		mux.HandleFunc("/", wp.Handler)
+		if err := http.ListenAndServe(fmt.Sprintf(":%d", c.Port), mux); err != nil {
+			log.Fatalf("Error starting server: %v", err)
+		}
 	}()
 	log.WithField("port", c.Port).Println("Server started")
 
@@ -50,5 +59,6 @@ func configDefaults() map[string]interface{} {
 		"server":           "ws://localhost:3000",
 		"auth_type":        "",
 		"key_manager_type": "",
+		"allowed_origins":  []string{},
 	}
 }

@@ -31,14 +31,18 @@ type websocketProxy struct {
 }
 
 // NewProxy returns a configured WebsocketProxy instance and fetches keys if required
-func NewProxy(url *url.URL, header http.Header, auth Auth, keyManager KeyManager) (WebsocketProxy, error) {
+func NewProxy(
+	url *url.URL,
+	header http.Header,
+	origins []string,
+	auth Auth,
+	keyManager KeyManager,
+) (WebsocketProxy, error) {
 	wsp := websocketProxy{
 		URL:    url,
 		Header: header,
 		Upgrader: &websocket.Upgrader{
-			CheckOrigin: func(r *http.Request) bool {
-				return true
-			},
+			CheckOrigin: checkOrigin(origins),
 		},
 		auth:       auth,
 		keyManager: keyManager,
@@ -125,4 +129,19 @@ func (wp websocketProxy) read(w http.ResponseWriter, conn *connection) {
 func (wp websocketProxy) close(conn *connection) {
 	_ = conn.client.Close()
 	_ = conn.server.Close()
+}
+
+func checkOrigin(origins []string) func(*http.Request) bool {
+	return func(r *http.Request) bool {
+		if len(origins) == 0 {
+			return true
+		}
+		co := r.Header.Get("Origin")
+		for _, o := range origins {
+			if o == co {
+				return true
+			}
+		}
+		return false
+	}
 }

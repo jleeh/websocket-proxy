@@ -6,10 +6,11 @@ import (
 
 // Config holds the configuration values for the proxy server
 type Config struct {
-	Port           int    `mapstructure:"port"`
-	Server         string `mapstructure:"server"`
-	AuthType       string `mapstructure:"auth_type"`
-	KeyManagerType string `mapstructure:"key_manager_type"`
+	Port           int      `mapstructure:"port"`
+	Server         string   `mapstructure:"server"`
+	AuthType       string   `mapstructure:"auth_type"`
+	KeyManagerType string   `mapstructure:"key_manager_type"`
+	AllowedOrigins []string `mapstructure:"allowed_origins"`
 }
 
 // New creates a new configuration instance via viper from a file and/or env vars
