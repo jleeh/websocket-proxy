@@ -80,7 +80,7 @@ import (
 )
 
 func main() {
-	u, _ := url.Parse("http://localhost:3000")
+	u, _ := url.Parse("ws://localhost:3000")
 	wp, _ := proxy.NewSimpleProxy(u)
 	
 	http.HandleFunc("/", wp.Handler)
