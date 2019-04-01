@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/jleeh/ws-auth-proxy/config"
-	"github.com/jleeh/ws-auth-proxy/proxy"
+	"github.com/jleeh/websocket-proxy/config"
+	"github.com/jleeh/websocket-proxy/proxy"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
