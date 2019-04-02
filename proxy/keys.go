@@ -10,6 +10,7 @@ import (
 )
 
 const (
+	KeyManagerEnv            = "env"
 	KeyManagerFile           = "file"
 	KeyManagerSecretsManager = "aws_sm"
 )
@@ -30,6 +31,9 @@ type KeyManager interface {
 func NewKeyManager(keyManagerType string, id string) KeyManager {
 	var k KeyManager
 	switch keyManagerType {
+	case KeyManagerEnv:
+		k = &Env{}
+		break
 	case KeyManagerFile:
 		k = &File{}
 		break
@@ -42,6 +46,27 @@ func NewKeyManager(keyManagerType string, id string) KeyManager {
 	return k
 }
 
+// Input takes a comma seperated env var and uses the content as keys
+type Env struct {
+	id string
+	keys []string
+}
+
+// ValidateKey returns a boolean to whether a key given is present
+func (e *Env) ValidateKey(key string) bool {
+	return validateKey(key, e.keys)
+}
+
+// FetchKeys sets the keys from the env var
+func (e *Env) FetchKeys() error {
+	return json.Unmarshal([]byte(os.Getenv(e.id)), &e.keys)
+}
+
+func (e *Env) setIdentifier(id string) {
+	e.id = id
+}
+
+
 // File manages keys on the local disk
 type File struct {
 	id string
@@ -50,12 +75,7 @@ type File struct {
 
 // ValidateKey returns a boolean to whether a key given is present in the file
 func (f *File) ValidateKey(key string) bool {
-	for _, k := range f.keys {
-		if k == key {
-			return true
-		}
-	}
-	return false
+	return validateKey(key, f.keys)
 }
 
 // FetchKeys sets the keys from the file on local disk
@@ -108,4 +128,13 @@ func (sm *SecretsManager) FetchKeys() error {
 
 func (sm *SecretsManager) setIdentifier(id string) {
 	sm.id = id
+}
+
+func validateKey(key string, keys []string) bool {
+	for _, k := range keys {
+		if k == key {
+			return true
+		}
+	}
+	return false
 }
