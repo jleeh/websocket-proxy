@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
+	proxy "github.com/jleeh/websocket-proxy"
 	"github.com/jleeh/websocket-proxy/config"
-	"github.com/jleeh/websocket-proxy/proxy"
 	log "github.com/sirupsen/logrus"
 	"net/http"
 	"net/url"
@@ -19,6 +19,8 @@ func main() {
 	if err != nil {
 		log.Fatalf("Error parsing server: %v", err)
 	}
+	log.SetLevel(c.LogLevel)
+
 	wp, err := proxy.NewProxy(
 		u,
 		nil,
@@ -61,5 +63,6 @@ func configDefaults() map[string]interface{} {
 		"key_manager_type": "",
 		"key_identifier":   "",
 		"allowed_origins":  []string{},
+		"log_level":        "5",
 	}
 }

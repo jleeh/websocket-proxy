@@ -1,4 +1,4 @@
-package proxy
+package websocket_proxy
 
 import (
 	"net/http"

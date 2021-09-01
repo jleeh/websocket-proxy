@@ -1,4 +1,4 @@
-package proxy
+package websocket_proxy
 
 import (
 	"encoding/json"
@@ -46,7 +46,7 @@ func NewKeyManager(keyManagerType string, id string) KeyManager {
 	return k
 }
 
-// Input takes a comma seperated env var and uses the content as keys
+// Env takes a comma separated env var and uses the content as keys
 type Env struct {
 	id string
 	keys []string

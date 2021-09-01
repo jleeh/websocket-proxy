@@ -1,17 +1,19 @@
 package config
 
 import (
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/viper"
 )
 
 // Config holds the configuration values for the proxy server
 type Config struct {
-	Port           int      `mapstructure:"port"`
-	Server         string   `mapstructure:"server"`
-	AuthType       string   `mapstructure:"auth_type"`
-	KeyManagerType string   `mapstructure:"key_manager_type"`
-	KeyIdentifier  string   `mapstructure:"key_identifier"`
-	AllowedOrigins []string `mapstructure:"allowed_origins"`
+	Port           int       `mapstructure:"port"`
+	Server         string    `mapstructure:"server"`
+	AuthType       string    `mapstructure:"auth_type"`
+	KeyManagerType string    `mapstructure:"key_manager_type"`
+	KeyIdentifier  string    `mapstructure:"key_identifier"`
+	AllowedOrigins []string  `mapstructure:"allowed_origins"`
+	LogLevel       log.Level `mapstructure:"log_level"`
 }
 
 // New creates a new configuration instance via viper from a file and/or env vars

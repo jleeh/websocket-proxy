@@ -1,12 +1,17 @@
-package proxy
+package websocket_proxy
 
 import (
 	"fmt"
 	"github.com/gorilla/websocket"
+	log "github.com/sirupsen/logrus"
+	"golang.org/x/sync/errgroup"
 	"net/http"
 	"net/url"
 	"os"
+	"time"
 )
+
+const Timeout = time.Hour * 24 * 7
 
 // WebsocketProxy is the generic interface for a proxy implementation
 type WebsocketProxy interface {
@@ -22,12 +27,13 @@ type connection struct {
 }
 
 type websocketProxy struct {
+	URL      *url.URL
+	Header   http.Header
+	Upgrader *websocket.Upgrader
+
 	auth        Auth
 	keyManager  KeyManager
 	connections []*connection
-	URL         *url.URL
-	Header      http.Header
-	Upgrader    *websocket.Upgrader
 }
 
 // NewSimpleProxy returns a configured proxy instance from just a url
@@ -63,7 +69,14 @@ func NewProxy(
 // Dial connects to the Websocket backend and returns an error if failing
 func (wp websocketProxy) Dial() (*websocket.Conn, error) {
 	c, _, err := websocket.DefaultDialer.Dial(wp.URL.String(), wp.Header)
-	return c, err
+	if err != nil {
+		return nil, err
+	}
+	err = c.SetReadDeadline(time.Now().Add(Timeout))
+	if err != nil {
+		return nil, err
+	}
+	return c, c.SetWriteDeadline(time.Now().Add(Timeout))
 }
 
 // Handler for an in-built http server. It authenticates the user if required,
@@ -86,9 +99,18 @@ func (wp websocketProxy) Handler(w http.ResponseWriter, r *http.Request) {
 	}
 	conn := &connection{cc, sc}
 	defer wp.close(conn)
+	log.WithField("IP", conn.client.RemoteAddr()).Info("New connection")
 
-	go wp.read(w, conn)
-	wp.write(w, conn)
+	g := errgroup.Group{}
+	g.Go(func() error {
+		return wp.read(w, conn)
+	})
+	g.Go(func() error {
+		return wp.write(w, conn)
+	})
+	if err := g.Wait(); err != nil {
+		log.Errorf("Error during handling websocket connection: %v", err)
+	}
 }
 
 // Close will disconnect all the active connections between client and server
@@ -104,35 +126,42 @@ func (wp websocketProxy) Wait(interrupt <-chan os.Signal) {
 	wp.Close()
 }
 
-func (wp websocketProxy) write(w http.ResponseWriter, conn *connection) {
+func (wp websocketProxy) write(_ http.ResponseWriter, conn *connection) error {
 	for {
 		t, msg, err := conn.client.ReadMessage()
 		if err != nil {
-			break
+			return err
 		}
 		err = conn.server.WriteMessage(t, msg)
 		if err != nil {
-			break
+			return err
 		}
+		log.WithField("IP", conn.client.RemoteAddr()).
+			WithField("Message", string(msg)).
+			Debug("Written message to server")
 	}
 }
 
-func (wp websocketProxy) read(w http.ResponseWriter, conn *connection) {
+func (wp websocketProxy) read(_ http.ResponseWriter, conn *connection) error {
 	for {
 		t, msg, err := conn.server.ReadMessage()
 		if err != nil {
-			break
+			return err
 		}
 		err = conn.client.WriteMessage(t, msg)
 		if err != nil {
-			break
+			return err
 		}
+		log.WithField("IP", conn.client.RemoteAddr()).
+			WithField("Message", string(msg)).
+			Debug("Read message from server")
 	}
 }
 
 func (wp websocketProxy) close(conn *connection) {
 	_ = conn.client.Close()
 	_ = conn.server.Close()
+	log.WithField("IP", conn.client.RemoteAddr()).Info("Closed connection")
 }
 
 func checkOrigin(origins []string) func(*http.Request) bool {
