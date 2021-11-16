@@ -1,4 +1,4 @@
-package websocket_proxy
+package websocketproxy
 
 import (
 	"encoding/json"
